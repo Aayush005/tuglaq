@@ -1,0 +1,1798 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Khilji Dynasty MCQ Quiz</title>
+    <style>
+        /* Reset some default styles */
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #f0f8ff, #e6f7ff);
+            color: #333;
+            display: flex;
+            justify-content: center;
+            align-items: flex-start; /* Accommodate fixed elements */
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        /* Timer Styling */
+        .timer {
+            position: fixed;          /* Fixes the position relative to the viewport */
+            top: 20px;                /* Positions 20px from the top */
+            right: 20px;              /* Positions 20px from the right */
+            font-size: 1.5rem;        /* Sets a readable font size */
+            color: #d9534f;           /* Sets the text color (red) */
+            font-weight: bold;        /* Makes the text bold */
+            z-index: 1000;            /* Ensures the timer stays above other elements */
+            background-color: rgba(255, 255, 255, 0.8); /* Semi-transparent background */
+            padding: 10px 15px;       /* Adds padding around the timer text */
+            border-radius: 5px;       /* Rounds the corners of the timer box */
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1); /* Adds a subtle shadow for depth */
+        }
+
+        /* Question Map Sidebar Styling */
+        .question-map {
+            position: fixed;          
+            top: 80px;                /* Positioned below the timer */
+            right: 20px;               /* Positioned on the right */
+            width: 180px;              /* Increased width to accommodate 5 columns */
+            background-color: rgba(255, 255, 255, 0.9); 
+            padding: 15px;
+            border-radius: 8px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+            z-index: 999;             
+            max-height: 90vh;         
+            overflow-y: auto;         
+        }
+
+        .question-map h2 {
+            text-align: center;
+            margin-bottom: 10px;
+            font-size: 1.2rem;
+            color: #007bff;
+        }
+
+        /* Update #questionLinks to Use CSS Grid */
+        #questionLinks {
+            display: grid;
+            grid-template-columns: repeat(5, 1fr);
+            grid-gap: 5px; /* Adjust the spacing between links as needed */
+            justify-items: center; /* Centers the links within each grid cell */
+        }
+
+        /* Adjust .question-map .question-link Styling */
+        .question-map .question-link {
+            padding: 5px 0; /* Reduces vertical padding */
+            font-size: 0.9rem; /* Slightly smaller font size for better fit */
+            width: 100%; /* Ensures the link takes the full width of the grid cell */
+            box-sizing: border-box; /* Includes padding and border in the element's total width and height */
+            border-radius: 4px; /* Maintains rounded corners */
+            text-align: center; /* Centers the text within the link */
+            background-color: #f8f9fa;
+            color: #007bff;
+            text-decoration: none;
+            border: 1px solid #007bff;
+            transition: background-color 0.3s, color 0.3s;
+        }
+
+        .question-map .question-link:hover {
+            background-color: #007bff;
+            color: #fff;
+        }
+
+        /* Add Correct and Incorrect Classes for Highlighting */
+        .question-map .question-link.correct {
+            background-color: #28a745; /* Green background */
+            color: #fff; /* White text */
+            border-color: #28a745; /* Green border */
+        }
+
+        .question-map .question-link.incorrect {
+            background-color: #dc3545; /* Red background */
+            color: #fff; /* White text */
+            border-color: #dc3545; /* Red border */
+        }
+
+        /* Add Attempted Class for Highlighting */
+        .question-map .question-link.attempted {
+            background-color: #17a2b8; /* Blue background for attempted questions */
+            color: #fff; /* White text */
+            border-color: #17a2b8; /* Blue border */
+        }
+
+        /* Submit Button and Score Styling */
+        .question-map .submit-section {
+            margin-top: 20px;
+            text-align: center;
+        }
+
+        .question-map .submit-btn {
+            display: block;
+            width: 100%;
+            padding: 10px;
+            background-color: #28a745;
+            color: #fff;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 1rem;
+            transition: background-color 0.3s;
+            margin-bottom: 10px;
+        }
+
+        .question-map .submit-btn:hover {
+            background-color: #218838;
+        }
+
+        .question-map .submit-btn:disabled {
+            background-color: #6c757d;
+            cursor: not-allowed;
+        }
+
+        .question-map .result {
+            font-size: 1rem;
+            font-weight: bold;
+            color: #17a2b8;
+        }
+
+        /* Smooth Scrolling */
+        html {
+            scroll-behavior: smooth;
+        }
+
+        /* Quiz Container Styling */
+        .quiz-container {
+            background-color: #fff;
+            padding: 30px 40px;
+            border-radius: 10px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            max-width: 800px;
+            width: 100%;
+            margin-right: 200px; /* Accommodates the question map sidebar on the right */
+            margin-top: 50px;     /* Maintains spacing from the top */
+        }
+
+        h1 {
+            text-align: center;
+            margin-bottom: 20px;
+            color: #007bff;
+        }
+
+        .question {
+            margin-bottom: 25px;
+        }
+
+        .question p {
+            margin-bottom: 10px;
+            font-weight: 500;
+        }
+
+        .options label {
+            display: block;
+            margin-bottom: 8px;
+            padding: 10px 15px;
+            border: 2px solid #007bff;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background-color 0.3s, color 0.3s;
+        }
+
+        .options input[type="radio"] {
+            display: none;
+        }
+
+        .options input[type="radio"]:checked + label {
+            background-color: #007bff;
+            color: #fff;
+        }
+
+        .options label:hover {
+            background-color: #e6f0ff;
+        }
+
+        .submit-btn {
+            display: block;
+            width: 100%;
+            padding: 15px;
+            background-color: #28a745;
+            color: #fff;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 1.1rem;
+            transition: background-color 0.3s;
+            margin-top: 20px;
+        }
+
+        .submit-btn:hover {
+            background-color: #218838;
+        }
+
+        .submit-btn:disabled {
+            background-color: #6c757d;
+            cursor: not-allowed;
+        }
+
+        .result {
+            margin-top: 30px;
+            font-size: 1.3rem;
+            font-weight: bold;
+            text-align: center;
+            color: #17a2b8;
+        }
+
+        /* Feedback Message Styling */
+        .feedback {
+            margin-top: 10px;
+            font-weight: bold;
+            font-size: 1rem;
+        }
+
+        .feedback.right {
+            color: #28a745; /* Green for correct answers */
+        }
+
+        .feedback.wrong {
+            color: #dc3545; /* Red for incorrect answers */
+        }
+
+        .feedback.not-attempted {
+            color: #6c757d; /* Gray for not attempted */
+        }
+
+        /* Alert when time is low */
+        .alert {
+            animation: blink 1s steps(5, start) infinite;
+        }
+
+        @keyframes blink {
+            to {
+                visibility: hidden;
+            }
+        }
+
+        /* Responsive Design */
+        @media (max-width: 768px) {
+            .quiz-container {
+                margin-right: 0; /* Removes right margin on small screens */
+            }
+
+            .question-map {
+                display: none; /* Hides the question map on small screens */
+            }
+
+            .toggle-question-map {
+                display: block; /* Shows toggle button on small screens */
+            }
+        }
+
+        /* Toggle Button for Question Map (Visible on Small Screens) */
+        .toggle-question-map {
+            position: fixed;
+            top: 20px;
+            right: 20px; /* Positioned on the right */
+            z-index: 1001;
+            background-color: #007bff;
+            color: #fff;
+            border: none;
+            border-radius: 4px;
+            padding: 8px 12px;
+            cursor: pointer;
+            font-size: 1.2rem;
+            display: none; /* Hidden by default */
+        }
+
+        /* Active State for Question Map on Small Screens */
+        .question-map.active {
+            display: block;
+        }
+    </style>
+</head>
+<body>
+    <!-- Timer Display -->
+    <div class="timer" id="timer">10:00</div>
+
+    <!-- Toggle Button for Question Map (Visible on Small Screens) -->
+    <button class="toggle-question-map" id="toggleQuestionMap">☰</button>
+
+    <!-- Question Map Sidebar -->
+    <div class="question-map" id="questionMap">
+        <h2>Question Map</h2>
+        <div id="questionLinks">
+            <!-- Question links will be injected here by JavaScript -->
+        </div>
+        <!-- Submit Button and Score Display Below the Question Links -->
+        <div class="submit-section">
+            <button type="button" class="submit-btn" id="submitBtn" onclick="checkAnswers()">Submit</button>
+            <div id="result" class="result"></div>
+        </div>
+    </div>
+
+    <div class="quiz-container">
+        <h1>Khilji Dynasty MCQ Quiz</h1>
+        
+        <form id="quizForm">
+            <!-- Questions will be injected here by JavaScript -->
+        </form>
+
+        <!-- Submit Button and Score Display Below the Questions List -->
+        <div class="submit-section">
+            <button type="button" class="submit-btn" id="submitBtnBelow" onclick="checkAnswers()">Submit</button>
+            <div id="resultBelow" class="result"></div>
+        </div>
+    </div>
+
+    <script>
+        // Declare shuffledQuestions globally
+        let shuffledQuestions = [];
+
+        // Replace the following array with your own questions
+        const questions = [
+    // 1. Founding and Establishment
+    const questions = [
+    // Questions to add (q1 to q60)
+    {
+        id: 'q1',
+        question: 'Who was the founder of the Tughlaq Dynasty?',
+        options: [
+            { text: 'Muhammad bin Tughlaq', isCorrect: false },
+            { text: 'Firoz Tughlaq', isCorrect: false },
+            { text: 'Ghiyasuddin Tughlaq', isCorrect: true },
+            { text: 'Nasiruddin Mahmud Tughlaq', isCorrect: false }
+        ]
+    },
+    {
+        id: 'q2',
+        question: 'During which years did the Tughlaq Dynasty rule?',
+        options: [
+            { text: '1206 - 1290 AD', isCorrect: false },
+            { text: '1320 - 1414 AD', isCorrect: true },
+            { text: '1351 - 1500 AD', isCorrect: false },
+            { text: '1400 - 1500 AD', isCorrect: false }
+        ]
+    },
+    {
+        id: 'q3',
+        question: 'Which ruler of the Tughlaq Dynasty was known as the \'Mad King\'?',
+        options: [
+            { text: 'Ghiyasuddin Tughlaq', isCorrect: false },
+            { text: 'Muhammad bin Tughlaq', isCorrect: true },
+            { text: 'Firoz Tughlaq', isCorrect: false },
+            { text: 'Nasiruddin Mahmud Tughlaq', isCorrect: false }
+        ]
+    },
+    {
+        id: 'q4',
+        question: 'Ghiyasuddin Tughlaq established a new city near Delhi. What was it called?',
+        options: [
+            { text: 'Fatehabad', isCorrect: false },
+            { text: 'Jaunpur', isCorrect: false },
+            { text: 'Tughlaqabad', isCorrect: true },
+            { text: 'Devagiri', isCorrect: false }
+        ]
+    },
+    {
+        id: 'q5',
+        question: 'What was the Chhappankot Fort also known as?',
+        options: [
+            { text: 'Firozshah Kotla', isCorrect: false },
+            { text: 'Tughlaqabad Fort', isCorrect: false },
+            { text: 'Chhappankot', isCorrect: true },
+            { text: 'Qutub Minar', isCorrect: false }
+        ]
+    },
+    {
+        id: 'q6',
+        question: 'Which significant infrastructure project was initiated by Ghiyasuddin Tughlaq?',
+        options: [
+            { text: 'Construction of Qutub Minar', isCorrect: false },
+            { text: 'Building of canals and wells', isCorrect: true },
+            { text: 'Establishment of the city of Fatehabad', isCorrect: false },
+            { text: 'Introduction of token currency', isCorrect: false }
+        ]
+    },
+    {
+        id: 'q7',
+        question: 'How did Ghiyasuddin Tughlaq become the Sultan of Delhi?',
+        options: [
+            { text: 'He was elected by nobles', isCorrect: false },
+            { text: 'He inherited the throne', isCorrect: false },
+            { text: 'He killed Khusrav Shah', isCorrect: true },
+            { text: 'He was appointed by the previous Sultan', isCorrect: false }
+        ]
+    },
+    {
+        id: 'q8',
+        question: 'Which traveler visited India during Muhammad bin Tughlaq\'s reign and was appointed as Qazi of Delhi?',
+        options: [
+            { text: 'Marco Polo', isCorrect: false },
+            { text: 'Ibn Battuta', isCorrect: true },
+            { text: 'Vasco da Gama', isCorrect: false },
+            { text: 'Zheng He', isCorrect: false }
+        ]
+    },
+    {
+        id: 'q9',
+        question: 'What was the original capital before Muhammad bin Tughlaq moved it to Devagiri?',
+        options: [
+            { text: 'Tughlaqabad', isCorrect: false },
+            { text: 'Fatehabad', isCorrect: false },
+            { text: 'Delhi', isCorrect: true },
+            { text: 'Jaunpur', isCorrect: false }
+        ]
+    },
+    {
+        id: 'q10',
+        question: 'Muhammad bin Tughlaq introduced a new department for agricultural development. What was it called?',
+        options: [
+            { text: 'Diwan-i-Khairat', isCorrect: false },
+            { text: 'Amir-i-Kohi', isCorrect: true },
+            { text: 'Diwan-i-Bandgan', isCorrect: false },
+            { text: 'Diwan-i-Adalat', isCorrect: false }
+        ]
+    },
+    {
+        id: 'q11',
+        question: 'Which two independent states were formed during Muhammad bin Tughlaq\'s reign?',
+        options: [
+            { text: 'Vijayanagara Empire and Bahmani Kingdom', isCorrect: true },
+            { text: 'Mughal Empire and Maratha Empire', isCorrect: false },
+            { text: 'Gupta Empire and Maurya Empire', isCorrect: false },
+            { text: 'Chola Empire and Pandya Empire', isCorrect: false }
+        ]
+    },
+    {
+        id: 'q12',
+        question: 'What was the cause of Ghiyasuddin Tughlaq\'s death?',
+        options: [
+            { text: 'Assassination', isCorrect: false },
+            { text: 'Battle wounds', isCorrect: false },
+            { text: 'Buried in a wooden palace', isCorrect: true },
+            { text: 'Natural causes', isCorrect: false }
+        ]
+    },
+    {
+        id: 'q13',
+        question: 'Which ruler was the first Muslim governor to impose Jizya on Brahmins?',
+        options: [
+            { text: 'Ghiyasuddin Tughlaq', isCorrect: false },
+            { text: 'Muhammad bin Tughlaq', isCorrect: false },
+            { text: 'Firoz Tughlaq', isCorrect: true },
+            { text: 'Nasiruddin Mahmud Tughlaq', isCorrect: false }
+        ]
+    },
+    {
+        id: 'q14',
+        question: 'Firoz Tughlaq is credited with establishing approximately how many new cities?',
+        options: [
+            { text: '100', isCorrect: false },
+            { text: '200', isCorrect: false },
+            { text: '300', isCorrect: true },
+            { text: '400', isCorrect: false }
+        ]
+    },
+    {
+        id: 'q15',
+        question: 'Which of the following was NOT one of the four taxes retained by Firoz Tughlaq?',
+        options: [
+            { text: 'Kharaj', isCorrect: false },
+            { text: 'Khums', isCorrect: false },
+            { text: 'Jizya', isCorrect: false },
+            { text: 'Zakat', isCorrect: false },
+            { text: 'Income Tax', isCorrect: true }
+        ]
+    },
+    {
+        id: 'q16',
+        question: 'What was the name of the fort built by Firoz Tughlaq in Delhi?',
+        options: [
+            { text: 'Tughlaqabad Fort', isCorrect: false },
+            { text: 'Chhappankot', isCorrect: false },
+            { text: 'Firozshah Kotla', isCorrect: true },
+            { text: 'Red Fort', isCorrect: false }
+        ]
+    },
+    {
+        id: 'q17',
+        question: 'Which scholar\'s autobiography did Firoz Tughlaq compose?',
+        options: [
+            { text: 'Ziauddin Barani', isCorrect: false },
+            { text: 'Shams-e-Shiraz Afif', isCorrect: false },
+            { text: 'Fatuhat-e-Firozshahi', isCorrect: true },
+            { text: 'Ibn Battuta', isCorrect: false }
+        ]
+    },
+    {
+        id: 'q18',
+        question: 'Which Sultanate ruler first celebrated the Holi festival?',
+        options: [
+            { text: 'Muhammad bin Tughlaq', isCorrect: false },
+            { text: 'Ghiyasuddin Tughlaq', isCorrect: false },
+            { text: 'Firoz Tughlaq', isCorrect: true },
+            { text: 'Nasiruddin Mahmud Tughlaq', isCorrect: false }
+        ]
+    },
+    {
+        id: 'q19',
+        question: 'Who established the Bahmani Kingdom in Maharashtra in 1347 AD?',
+        options: [
+            { text: 'Harihara', isCorrect: false },
+            { text: 'Bukka', isCorrect: false },
+            { text: 'Alauddin Bahman Shah', isCorrect: true },
+            { text: 'Malik Kafur', isCorrect: false }
+        ]
+    },
+    {
+        id: 'q20',
+        question: 'Which ruler of the Tughlaq Dynasty was the last to rule?',
+        options: [
+            { text: 'Ghiyasuddin Tughlaq', isCorrect: false },
+            { text: 'Muhammad bin Tughlaq', isCorrect: false },
+            { text: 'Firoz Tughlaq', isCorrect: false },
+            { text: 'Nasiruddin Mahmud Tughlaq', isCorrect: true }
+        ]
+    },
+    {
+        id: 'q21',
+        question: 'In which year did Timur invade Delhi, leading to the decline of the Tughlaq Dynasty?',
+        options: [
+            { text: '1351 AD', isCorrect: false },
+            { text: '1388 AD', isCorrect: false },
+            { text: '1398 AD', isCorrect: true },
+            { text: '1414 AD', isCorrect: false }
+        ]
+    },
+    {
+        id: 'q22',
+        question: 'What was the value of the token currency introduced by Muhammad bin Tughlaq?',
+        options: [
+            { text: 'Equal to gold', isCorrect: false },
+            { text: 'Equal to silver tanka', isCorrect: true },
+            { text: 'Equal to copper', isCorrect: false },
+            { text: 'Equal to bronze', isCorrect: false }
+        ]
+    },
+    {
+        id: 'q23',
+        question: 'Which department did Firoz Tughlaq establish to aid orphaned women, widows, and girls?',
+        options: [
+            { text: 'Diwan-i-Kohi', isCorrect: false },
+            { text: 'Diwan-i-Khairat', isCorrect: true },
+            { text: 'Diwan-i-Bandgan', isCorrect: false },
+            { text: 'Diwan-i-Adalat', isCorrect: false }
+        ]
+    },
+    {
+        id: 'q24',
+        question: 'What significant action did Firoz Tughlaq take regarding military positions?',
+        options: [
+            { text: 'Abolished the military', isCorrect: false },
+            { text: 'Made military posts hereditary', isCorrect: true },
+            { text: 'Increased military taxes', isCorrect: false },
+            { text: 'Decentralized military power', isCorrect: false }
+        ]
+    },
+    {
+        id: 'q25',
+        question: 'Which architectural structure did Firoz Tughlaq bring to Delhi from Topra village and Meerut?',
+        options: [
+            { text: 'Qutub Minar', isCorrect: false },
+            { text: 'Two pillars of Ashoka', isCorrect: true },
+            { text: 'Red Fort', isCorrect: false },
+            { text: 'Humayun\'s Tomb', isCorrect: false }
+        ]
+    },
+    {
+        id: 'q26',
+        question: 'Who succeeded Muhammad bin Tughlaq after his death?',
+        options: [
+            { text: 'Ghiyasuddin Tughlaq', isCorrect: false },
+            { text: 'Firoz Tughlaq', isCorrect: true },
+            { text: 'Nasiruddin Mahmud Tughlaq', isCorrect: false },
+            { text: 'Timur', isCorrect: false }
+        ]
+    },
+    {
+        id: 'q27',
+        question: 'What was the primary focus of Ghiyasuddin Tughlaq\'s last military campaign?',
+        options: [
+            { text: 'Invading Khorasan', isCorrect: false },
+            { text: 'Suppressing rebellion in Bengal', isCorrect: true },
+            { text: 'Expanding to the south', isCorrect: false },
+            { text: 'Defending against Timur', isCorrect: false }
+        ]
+    },
+    {
+        id: 'q28',
+        question: 'Which historian commented on Muhammad bin Tughlaq\'s death, stating it was a liberation for the people?',
+        options: [
+            { text: 'Ibn Battuta', isCorrect: false },
+            { text: 'Ziauddin Barani', isCorrect: false },
+            { text: 'Badauni', isCorrect: true },
+            { text: 'Al-Biruni', isCorrect: false }
+        ]
+    },
+    {
+        id: 'q29',
+        question: 'What was the name of the department established by Firoz Tughlaq to manage and care for slaves?',
+        options: [
+            { text: 'Diwan-i-Khairat', isCorrect: false },
+            { text: 'Diwan-i-Bandgan', isCorrect: true },
+            { text: 'Diwan-i-Kohi', isCorrect: false },
+            { text: 'Diwan-i-Adalat', isCorrect: false }
+        ]
+    },
+    {
+        id: 'q30',
+        question: 'Which of the following cities was NOT established by Firoz Tughlaq?',
+        options: [
+            { text: 'Hisar', isCorrect: false },
+            { text: 'Firozabad', isCorrect: false },
+            { text: 'Fatehabad', isCorrect: false },
+            { text: 'Agra', isCorrect: true }
+        ]
+    },
+    {
+        id: 'q31',
+        question: 'Which language was used by Firoz Tughlaq in his autobiography?',
+        options: [
+            { text: 'Persian', isCorrect: false },
+            { text: 'Arabic', isCorrect: false },
+            { text: 'Turkish', isCorrect: true },
+            { text: 'Sanskrit', isCorrect: false }
+        ]
+    },
+    {
+        id: 'q32',
+        question: 'What was the name given to the coins made of a mixture of silver and copper issued by Firoz Tughlaq?',
+        options: [
+            { text: 'Tanka and Jital', isCorrect: false },
+            { text: 'Adha and Vikh', isCorrect: true },
+            { text: 'Dinar and Dirham', isCorrect: false },
+            { text: 'Sikka and Rupiya', isCorrect: false }
+        ]
+    },
+    {
+        id: 'q33',
+        question: 'Which ruler of the Tughlaq Dynasty moved the capital to Daulatabad?',
+        options: [
+            { text: 'Ghiyasuddin Tughlaq', isCorrect: false },
+            { text: 'Muhammad bin Tughlaq', isCorrect: true },
+            { text: 'Firoz Tughlaq', isCorrect: false },
+            { text: 'Nasiruddin Mahmud Tughlaq', isCorrect: false }
+        ]
+    },
+    {
+        id: 'q34',
+        question: 'What was the primary reason for the decline of the Tughlaq Dynasty?',
+        options: [
+            { text: 'Economic prosperity', isCorrect: false },
+            { text: 'Strong military', isCorrect: false },
+            { text: 'Internal strife and external invasions', isCorrect: true },
+            { text: 'Cultural assimilation', isCorrect: false }
+        ]
+    },
+    {
+        id: 'q35',
+        question: 'Nasiruddin Mahmud Tughlaq\'s rule was limited to which area?',
+        options: [
+            { text: 'Entire Delhi Sultanate', isCorrect: false },
+            { text: 'Delhi to Palam', isCorrect: true },
+            { text: 'South India', isCorrect: false },
+            { text: 'Northern India only', isCorrect: false }
+        ]
+    },
+    {
+        id: 'q36',
+        question: 'Which department did Muhammad bin Tughlaq establish to enhance agricultural development?',
+        options: [
+            { text: 'Diwan-i-Khairat', isCorrect: false },
+            { text: 'Amir-i-Kohi', isCorrect: true },
+            { text: 'Diwan-i-Bandgan', isCorrect: false },
+            { text: 'Diwan-i-Adalat', isCorrect: false }
+        ]
+    },
+    {
+        id: 'q37',
+        question: 'Who were the two brothers that founded the Vijayanagara Empire during Muhammad bin Tughlaq\'s reign?',
+        options: [
+            { text: 'Ali and Hasan', isCorrect: false },
+            { text: 'Harihara and Bukka', isCorrect: true },
+            { text: 'Babur and Humayun', isCorrect: false },
+            { text: 'Akbar and Jahangir', isCorrect: false }
+        ]
+    },
+    {
+        id: 'q38',
+        question: 'Which scholar was protected by Firoz Tughlaq as mentioned in his autobiography?',
+        options: [
+            { text: 'Ibn Battuta', isCorrect: false },
+            { text: 'Ziauddin Barani', isCorrect: true },
+            { text: 'Al-Biruni', isCorrect: false },
+            { text: 'Razi', isCorrect: false }
+        ]
+    },
+    {
+        id: 'q39',
+        question: 'What was the irrigation tax imposed by Firoz Tughlaq?',
+        options: [
+            { text: '1/5th of produce', isCorrect: false },
+            { text: '1/10th of produce', isCorrect: true },
+            { text: '1/2 of produce', isCorrect: false },
+            { text: 'No irrigation tax was imposed', isCorrect: false }
+        ]
+    },
+    {
+        id: 'q40',
+        question: 'Firoz Tughlaq was the first ruler of the Delhi Sultanate to celebrate which festival?',
+        options: [
+            { text: 'Diwali', isCorrect: false },
+            { text: 'Eid', isCorrect: false },
+            { text: 'Holi', isCorrect: true },
+            { text: 'Ramadan', isCorrect: false }
+        ]
+    },
+    {
+        id: 'q41',
+        question: 'In which empire was established in the south by Harihara and Bukka in 1336 AD?',
+        options: [
+            { text: 'Mughal Empire', isCorrect: false },
+            { text: 'Vijayanagara Empire', isCorrect: true },
+            { text: 'Maratha Empire', isCorrect: false },
+            { text: 'Bahmani Kingdom', isCorrect: false }
+        ]
+    },
+    {
+        id: 'q42',
+        question: 'Which major structural project did Firoz Tughlaq undertake in Delhi?',
+        options: [
+            { text: 'Qutub Minar', isCorrect: false },
+            { text: 'Firozshah Kotla Fort', isCorrect: true },
+            { text: 'Red Fort', isCorrect: false },
+            { text: 'Humayun\'s Tomb', isCorrect: false }
+        ]
+    },
+    {
+        id: 'q43',
+        question: 'What was the name of the department established by Firoz Tughlaq to support orphaned women and widows?',
+        options: [
+            { text: 'Diwan-i-Kohi', isCorrect: false },
+            { text: 'Diwan-i-Khairat', isCorrect: true },
+            { text: 'Diwan-i-Bandgan', isCorrect: false },
+            { text: 'Diwan-i-Adalat', isCorrect: false }
+        ]
+    },
+    {
+        id: 'q44',
+        question: 'How did Firoz Tughlaq contribute to social welfare?',
+        options: [
+            { text: 'Established Diwan-i-Khairat', isCorrect: true },
+            { text: 'Introduced new taxes', isCorrect: false },
+            { text: 'Abolished slavery', isCorrect: false },
+            { text: 'Promoted religious intolerance', isCorrect: false }
+        ]
+    },
+    {
+        id: 'q45',
+        question: 'Which significant event marked the end of the Tughlaq Dynasty?',
+        options: [
+            { text: 'Founding of Vijayanagara Empire', isCorrect: false },
+            { text: 'Establishment of Bahmani Kingdom', isCorrect: false },
+            { text: 'Timur\'s invasion of Delhi', isCorrect: true },
+            { text: 'Death of Firoz Tughlaq', isCorrect: false }
+        ]
+    },
+    {
+        id: 'q46',
+        question: 'What was the primary focus of Ghiyasuddin Tughlaq\'s irrigation projects?',
+        options: [
+            { text: 'Urban development', isCorrect: false },
+            { text: 'Military expansion', isCorrect: false },
+            { text: 'Agricultural improvement', isCorrect: true },
+            { text: 'Trade enhancement', isCorrect: false }
+        ]
+    },
+    {
+        id: 'q47',
+        question: 'Which ruler moved the capital from Delhi to Devagiri?',
+        options: [
+            { text: 'Ghiyasuddin Tughlaq', isCorrect: false },
+            { text: 'Muhammad bin Tughlaq', isCorrect: true },
+            { text: 'Firoz Tughlaq', isCorrect: false },
+            { text: 'Nasiruddin Mahmud Tughlaq', isCorrect: false }
+        ]
+    },
+    {
+        id: 'q48',
+        question: 'What was the purpose of the Diwan-i-Bandgan established by Firoz Tughlaq?',
+        options: [
+            { text: 'Tax collection', isCorrect: false },
+            { text: 'Agricultural development', isCorrect: false },
+            { text: 'Managing slaves', isCorrect: true },
+            { text: 'Military recruitment', isCorrect: false }
+        ]
+    },
+    {
+        id: 'q49',
+        question: 'Which department was responsible for employment and public works under Firoz Tughlaq?',
+        options: [
+            { text: 'Diwan-i-Khairat', isCorrect: false },
+            { text: 'Diwan-i-Kohi', isCorrect: false },
+            { text: 'Diwan-i-Bandgan', isCorrect: false },
+            { text: 'Lok Nirmaan Vibhag (Public Works Department)', isCorrect: true }
+        ]
+    },
+    {
+        id: 'q50',
+        question: 'Which ruler was known for constructing the Firozshah Kotla fort in Delhi?',
+        options: [
+            { text: 'Ghiyasuddin Tughlaq', isCorrect: false },
+            { text: 'Muhammad bin Tughlaq', isCorrect: false },
+            { text: 'Firoz Tughlaq', isCorrect: true },
+            { text: 'Nasiruddin Mahmud Tughlaq', isCorrect: false }
+        ]
+    },
+    {
+        id: 'q51',
+        question: 'Who was appointed as Muhammad bin Tughlaq\'s ambassador to Timur\'s court in China?',
+        options: [
+            { text: 'Ziauddin Barani', isCorrect: false },
+            { text: 'Ibn Battuta', isCorrect: true },
+            { text: 'Shams-e-Shiraz Afif', isCorrect: false },
+            { text: 'Juna Khan', isCorrect: false }
+        ]
+    },
+    {
+        id: 'q52',
+        question: 'What was the name given to the wooden palace where Ghiyasuddin Tughlaq was buried?',
+        options: [
+            { text: 'Tughlaqabad Palace', isCorrect: false },
+            { text: 'Juna Khan Palace', isCorrect: false },
+            { text: 'Wooden Palace of Juna Khan', isCorrect: true },
+            { text: 'Chhappankot Palace', isCorrect: false }
+        ]
+    },
+    {
+        id: 'q53',
+        question: 'Which ruler was responsible for abolishing 24 taxes and retaining only four?',
+        options: [
+            { text: 'Ghiyasuddin Tughlaq', isCorrect: false },
+            { text: 'Muhammad bin Tughlaq', isCorrect: false },
+            { text: 'Firoz Tughlaq', isCorrect: true },
+            { text: 'Nasiruddin Mahmud Tughlaq', isCorrect: false }
+        ]
+    },
+    {
+        id: 'q54',
+        question: 'Which of the following was a major cause of dissatisfaction among the people during Muhammad bin Tughlaq\'s reign?',
+        options: [
+            { text: 'Lack of educational institutions', isCorrect: false },
+            { text: 'Harsh taxation and cruel policies', isCorrect: true },
+            { text: 'Excessive focus on art', isCorrect: false },
+            { text: 'Weak military', isCorrect: false }
+        ]
+    },
+    {
+        id: 'q55',
+        question: 'Which city did Muhammad bin Tughlaq rename to Daulatabad?',
+        options: [
+            { text: 'Delhi', isCorrect: false },
+            { text: 'Tughlaqabad', isCorrect: false },
+            { text: 'Devagiri', isCorrect: true },
+            { text: 'Fatehabad', isCorrect: false }
+        ]
+    },
+    {
+        id: 'q56',
+        question: 'What significant change did Firoz Tughlaq make to the tax system?',
+        options: [
+            { text: 'Increased the number of taxes', isCorrect: false },
+            { text: 'Abolished all taxes', isCorrect: false },
+            { text: 'Reduced the number of taxes to four', isCorrect: true },
+            { text: 'Introduced income tax', isCorrect: false }
+        ]
+    },
+    {
+        id: 'q57',
+        question: 'Which ruler is associated with the construction of canals in the Tughlaq Dynasty?',
+        options: [
+            { text: 'Ghiyasuddin Tughlaq', isCorrect: true },
+            { text: 'Muhammad bin Tughlaq', isCorrect: false },
+            { text: 'Firoz Tughlaq', isCorrect: false },
+            { text: 'Nasiruddin Mahmud Tughlaq', isCorrect: false }
+        ]
+    },
+    {
+        id: 'q58',
+        question: 'Who established the independent state of Vijayanagara in 1336 AD?',
+        options: [
+            { text: 'Alauddin Bahman Shah', isCorrect: false },
+            { text: 'Harihara and Bukka', isCorrect: true },
+            { text: 'Muhammad bin Tughlaq', isCorrect: false },
+            { text: 'Firoz Tughlaq', isCorrect: false }
+        ]
+    },
+    {
+        id: 'q59',
+        question: 'Which ruler shifted the capital to Devagiri and introduced token currency?',
+        options: [
+            { text: 'Ghiyasuddin Tughlaq', isCorrect: false },
+            { text: 'Muhammad bin Tughlaq', isCorrect: true },
+            { text: 'Firoz Tughlaq', isCorrect: false },
+            { text: 'Nasiruddin Mahmud Tughlaq', isCorrect: false }
+        ]
+    },
+    {
+        id: 'q60',
+        question: 'What was the relationship between Firoz Tughlaq and Muhammad bin Tughlaq?',
+        options: [
+            { text: 'Father and son', isCorrect: false },
+            { text: 'Brothers', isCorrect: false },
+            { text: 'Cousins', isCorrect: true },
+            { text: 'Unrelated', isCorrect: false }
+        ]
+    },
+
+    // More questions for test (q61 to q120)
+    {
+        id: 'q61',
+        question: 'Founder of Tughlaq Dynasty?',
+        options: [
+            { text: 'Muhammad bin Tughlaq', isCorrect: false },
+            { text: 'Firoz Tughlaq', isCorrect: false },
+            { text: 'Ghiyasuddin Tughlaq', isCorrect: true },
+            { text: 'Nasiruddin Mahmud Tughlaq', isCorrect: false }
+        ]
+    },
+    {
+        id: 'q62',
+        question: 'Tughlaq Dynasty Duration?',
+        options: [
+            { text: '1200-1300 AD', isCorrect: false },
+            { text: '1320-1414 AD', isCorrect: true },
+            { text: '1350-1450 AD', isCorrect: false },
+            { text: '1400-1500 AD', isCorrect: false }
+        ]
+    },
+    {
+        id: 'q63',
+        question: 'Nickname of Muhammad bin Tughlaq?',
+        options: [
+            { text: 'Ghazi Malik', isCorrect: false },
+            { text: 'Mad King', isCorrect: true },
+            { text: 'Just Ruler', isCorrect: false },
+            { text: 'Wise Sultan', isCorrect: false }
+        ]
+    },
+    {
+        id: 'q64',
+        question: 'City Established by Ghiyasuddin?',
+        options: [
+            { text: 'Fatehabad', isCorrect: false },
+            { text: 'Tughlaqabad', isCorrect: true },
+            { text: 'Jaunpur', isCorrect: false },
+            { text: 'Devagiri', isCorrect: false }
+        ]
+    },
+    {
+        id: 'q65',
+        question: 'Chhappankot Fort Style?',
+        options: [
+            { text: 'Gothic', isCorrect: false },
+            { text: 'Roman', isCorrect: true },
+            { text: 'Mughal', isCorrect: false },
+            { text: 'Persian', isCorrect: false }
+        ]
+    },
+    {
+        id: 'q66',
+        question: 'Last Ruler of Dynasty?',
+        options: [
+            { text: 'Ghiyasuddin', isCorrect: false },
+            { text: 'Muhammad bin Tughlaq', isCorrect: false },
+            { text: 'Firoz Tughlaq', isCorrect: false },
+            { text: 'Nasiruddin Mahmud Tughlaq', isCorrect: true }
+        ]
+    },
+    {
+        id: 'q67',
+        question: 'Capital Shifted to?',
+        options: [
+            { text: 'Delhi', isCorrect: false },
+            { text: 'Tughlaqabad', isCorrect: false },
+            { text: 'Devagiri', isCorrect: true },
+            { text: 'Fatehabad', isCorrect: false }
+        ]
+    },
+    {
+        id: 'q68',
+        question: 'Department for Agriculture?',
+        options: [
+            { text: 'Diwan-i-Khairat', isCorrect: false },
+            { text: 'Amir-i-Kohi', isCorrect: true },
+            { text: 'Diwan-i-Bandgan', isCorrect: false },
+            { text: 'Diwan-i-Adalat', isCorrect: false }
+        ]
+    },
+    {
+        id: 'q69',
+        question: 'Fort Built by Firoz?',
+        options: [
+            { text: 'Red Fort', isCorrect: false },
+            { text: 'Tughlaqabad Fort', isCorrect: false },
+            { text: 'Firozshah Kotla', isCorrect: true },
+            { text: 'Qutub Minar', isCorrect: false }
+        ]
+    },
+    {
+        id: 'q70',
+        question: 'Introduced Token Currency?',
+        options: [
+            { text: 'Ghiyasuddin', isCorrect: false },
+            { text: 'Muhammad bin Tughlaq', isCorrect: true },
+            { text: 'Firoz Tughlaq', isCorrect: false },
+            { text: 'Nasiruddin Mahmud Tughlaq', isCorrect: false }
+        ]
+    },
+    {
+        id: 'q71',
+        question: 'Department for Slaves?',
+        options: [
+            { text: 'Diwan-i-Khairat', isCorrect: false },
+            { text: 'Amir-i-Kohi', isCorrect: false },
+            { text: 'Diwan-i-Bandgan', isCorrect: true },
+            { text: 'Diwan-i-Adalat', isCorrect: false }
+        ]
+    },
+    {
+        id: 'q72',
+        question: 'First Sultan to Celebrate Holi?',
+        options: [
+            { text: 'Ghiyasuddin', isCorrect: false },
+            { text: 'Muhammad bin Tughlaq', isCorrect: false },
+            { text: 'Firoz Tughlaq', isCorrect: true },
+            { text: 'Nasiruddin Mahmud Tughlaq', isCorrect: false }
+        ]
+    },
+    {
+        id: 'q73',
+        question: 'Invasion by Timur Year?',
+        options: [
+            { text: '1351 AD', isCorrect: false },
+            { text: '1388 AD', isCorrect: false },
+            { text: '1398 AD', isCorrect: true },
+            { text: '1414 AD', isCorrect: false }
+        ]
+    },
+    {
+        id: 'q74',
+        question: 'Ibn Battuta\'s Role?',
+        options: [
+            { text: 'Military Leader', isCorrect: false },
+            { text: 'Qazi of Delhi', isCorrect: false },
+            { text: 'Court Poet', isCorrect: false },
+            { text: 'Ambassador to China', isCorrect: true }
+        ]
+    },
+    {
+        id: 'q75',
+        question: 'New Department for Welfare?',
+        options: [
+            { text: 'Diwan-i-Khairat', isCorrect: true },
+            { text: 'Amir-i-Kohi', isCorrect: false },
+            { text: 'Diwan-i-Bandgan', isCorrect: false },
+            { text: 'Diwan-i-Adalat', isCorrect: false }
+        ]
+    },
+    {
+        id: 'q76',
+        question: 'Coins Called?',
+        options: [
+            { text: 'Tanka and Jital', isCorrect: false },
+            { text: 'Adha and Vikh', isCorrect: true },
+            { text: 'Dinar and Dirham', isCorrect: false },
+            { text: 'Sikka and Rupiya', isCorrect: false }
+        ]
+    },
+    {
+        id: 'q77',
+        question: 'Two Pillars of Ashoka Relocated?',
+        options: [
+            { text: 'From Delhi', isCorrect: false },
+            { text: 'From Topra and Meerut', isCorrect: true },
+            { text: 'From Tughlaqabad', isCorrect: false },
+            { text: 'From Fatehabad', isCorrect: false }
+        ]
+    },
+    {
+        id: 'q78',
+        question: 'Established Vijayanagara Empire Year?',
+        options: [
+            { text: '1325 AD', isCorrect: false },
+            { text: '1333 AD', isCorrect: false },
+            { text: '1336 AD', isCorrect: true },
+            { text: '1347 AD', isCorrect: false }
+        ]
+    },
+    {
+        id: 'q79',
+        question: 'Established Bahmani Kingdom Year?',
+        options: [
+            { text: '1336 AD', isCorrect: false },
+            { text: '1347 AD', isCorrect: true },
+            { text: '1351 AD', isCorrect: false },
+            { text: '1398 AD', isCorrect: false }
+        ]
+    },
+    {
+        id: 'q80',
+        question: 'Cause of Ghiyasuddin\'s Death?',
+        options: [
+            { text: 'Battle wounds', isCorrect: false },
+            { text: 'Assassination', isCorrect: false },
+            { text: 'Buried in wooden palace', isCorrect: true },
+            { text: 'Natural causes', isCorrect: false }
+        ]
+    },
+    {
+        id: 'q81',
+        question: 'Number of Provinces Under Tughlaq?',
+        options: [
+            { text: '15', isCorrect: false },
+            { text: '20', isCorrect: false },
+            { text: '23', isCorrect: true },
+            { text: '25', isCorrect: false }
+        ]
+    },
+    {
+        id: 'q82',
+        question: 'Firoz Tughlaq\'s Tax Reduction?',
+        options: [
+            { text: '10 to 5 taxes', isCorrect: false },
+            { text: '24 to 4 taxes', isCorrect: true },
+            { text: '30 to 10 taxes', isCorrect: false },
+            { text: '50 to 25 taxes', isCorrect: false }
+        ]
+    },
+    {
+        id: 'q83',
+        question: 'Firoz Tughlaq\'s Autobiography?',
+        options: [
+            { text: 'Fatuhat-e-Firozshahi', isCorrect: true },
+            { text: 'Diwan-i-Khairat', isCorrect: false },
+            { text: 'Rehla', isCorrect: false },
+            { text: 'Tughlaqnama', isCorrect: false }
+        ]
+    },
+    {
+        id: 'q84',
+        question: 'Firoz Tughlaq\'s Department for Employment?',
+        options: [
+            { text: 'Diwan-i-Kohi', isCorrect: false },
+            { text: 'Diwan-i-Khairat', isCorrect: false },
+            { text: 'Lok Nirmaan Vibhag', isCorrect: true },
+            { text: 'Diwan-i-Adalat', isCorrect: false }
+        ]
+    },
+    {
+        id: 'q85',
+        question: 'Capital Renamed to?',
+        options: [
+            { text: 'Delhi', isCorrect: false },
+            { text: 'Tughlaqabad', isCorrect: false },
+            { text: 'Daulatabad', isCorrect: true },
+            { text: 'Fatehabad', isCorrect: false }
+        ]
+    },
+    {
+        id: 'q86',
+        question: 'Muhammad bin Tughlaq\'s Death Location?',
+        options: [
+            { text: 'Delhi', isCorrect: false },
+            { text: 'Tughlaqabad', isCorrect: false },
+            { text: 'Godal near Thatta', isCorrect: true },
+            { text: 'Devagiri', isCorrect: false }
+        ]
+    },
+    {
+        id: 'q87',
+        question: 'Firoz Tughlaq\'s Celebrated Festival?',
+        options: [
+            { text: 'Diwali', isCorrect: false },
+            { text: 'Eid', isCorrect: false },
+            { text: 'Holi', isCorrect: true },
+            { text: 'Ramadan', isCorrect: false }
+        ]
+    },
+    {
+        id: 'q88',
+        question: 'Diwan-i-Khairat Purpose?',
+        options: [
+            { text: 'Tax collection', isCorrect: false },
+            { text: 'Aid to widows', isCorrect: true },
+            { text: 'Military management', isCorrect: false },
+            { text: 'Trade regulation', isCorrect: false }
+        ]
+    },
+    {
+        id: 'q89',
+        question: 'Firoz Tughlaq\'s Military Policy?',
+        options: [
+            { text: 'Centralized military', isCorrect: false },
+            { text: 'Hereditary posts', isCorrect: true },
+            { text: 'Increased army size', isCorrect: false },
+            { text: 'Reduced military funding', isCorrect: false }
+        ]
+    },
+    {
+        id: 'q90',
+        question: 'Tughlaq Dynasty\'s Last Year?',
+        options: [
+            { text: '1388 AD', isCorrect: false },
+            { text: '1398 AD', isCorrect: false },
+            { text: '1414 AD', isCorrect: true },
+            { text: '1420 AD', isCorrect: false }
+        ]
+    },
+    {
+        id: 'q91',
+        question: 'Firoz Tughlaq\'s Department for Slaves?',
+        options: [
+            { text: 'Diwan-i-Khairat', isCorrect: false },
+            { text: 'Amir-i-Kohi', isCorrect: false },
+            { text: 'Diwan-i-Bandgan', isCorrect: true },
+            { text: 'Diwan-i-Adalat', isCorrect: false }
+        ]
+    },
+    {
+        id: 'q92',
+        question: 'Firoz Tughlaq\'s Coin Mix Metals?',
+        options: [
+            { text: 'Gold and silver', isCorrect: false },
+            { text: 'Silver and copper', isCorrect: true },
+            { text: 'Copper and bronze', isCorrect: false },
+            { text: 'Bronze and gold', isCorrect: false }
+        ]
+    },
+    {
+        id: 'q93',
+        question: 'Firoz Tughlaq\'s Legacy in Delhi?',
+        options: [
+            { text: 'Red Fort', isCorrect: false },
+            { text: 'Qutub Minar', isCorrect: false },
+            { text: 'Firozshah Kotla', isCorrect: true },
+            { text: 'Humayun\'s Tomb', isCorrect: false }
+        ]
+    },
+    {
+        id: 'q94',
+        question: 'Firoz Tughlaq\'s Capital Coronation?',
+        options: [
+            { text: 'Thatta', isCorrect: false },
+            { text: 'Devagiri', isCorrect: false },
+            { text: 'Delhi', isCorrect: true },
+            { text: 'Fatehabad', isCorrect: false }
+        ]
+    },
+    {
+        id: 'q95',
+        question: 'Firoz Tughlaq\'s Autobiography Language?',
+        options: [
+            { text: 'Persian', isCorrect: false },
+            { text: 'Arabic', isCorrect: false },
+            { text: 'Turkish', isCorrect: true },
+            { text: 'Sanskrit', isCorrect: false }
+        ]
+    },
+    {
+        id: 'q96',
+        question: 'Firoz Tughlaq\'s Department for Slaves?',
+        options: [
+            { text: 'Diwan-i-Khairat', isCorrect: false },
+            { text: 'Amir-i-Kohi', isCorrect: false },
+            { text: 'Diwan-i-Bandgan', isCorrect: true },
+            { text: 'Lok Nirmaan Vibhag', isCorrect: false }
+        ]
+    },
+    {
+        id: 'q97',
+        question: 'First Sultan to Imose Jizya on Brahmins?',
+        options: [
+            { text: 'Ghiyasuddin', isCorrect: false },
+            { text: 'Muhammad bin Tughlaq', isCorrect: false },
+            { text: 'Firoz Tughlaq', isCorrect: true },
+            { text: 'Nasiruddin Mahmud Tughlaq', isCorrect: false }
+        ]
+    },
+    {
+        id: 'q98',
+        question: 'Ibn Battuta\'s Book Mention?',
+        options: [
+            { text: 'Fatuhat-e-Firozshahi', isCorrect: false },
+            { text: 'Rehla (Sefarname)', isCorrect: true },
+            { text: 'Diwan-i-Khairat', isCorrect: false },
+            { text: 'Tughlaqnama', isCorrect: false }
+        ]
+    },
+    {
+        id: 'q99',
+        question: 'Firoz Tughlaq\'s Department for Slaves?',
+        options: [
+            { text: 'Diwan-i-Khairat', isCorrect: false },
+            { text: 'Amir-i-Kohi', isCorrect: false },
+            { text: 'Diwan-i-Bandgan', isCorrect: true },
+            { text: 'Lok Nirmaan Vibhag', isCorrect: false }
+        ]
+    },
+    {
+        id: 'q100',
+        question: 'Firoz Tughlaq\'s Death Year?',
+        options: [
+            { text: '1351 AD', isCorrect: false },
+            { text: '1388 AD', isCorrect: true },
+            { text: '1398 AD', isCorrect: false },
+            { text: '1414 AD', isCorrect: false }
+        ]
+    },
+    {
+        id: 'q101',
+        question: 'Firoz Tughlaq\'s Department for Orphans?',
+        options: [
+            { text: 'Diwan-i-Khairat', isCorrect: true },
+            { text: 'Diwan-i-Kohi', isCorrect: false },
+            { text: 'Diwan-i-Bandgan', isCorrect: false },
+            { text: 'Diwan-i-Adalat', isCorrect: false }
+        ]
+    },
+    {
+        id: 'q102',
+        question: 'Firoz Tughlaq\'s Number of Cities?',
+        options: [
+            { text: '100', isCorrect: false },
+            { text: '200', isCorrect: false },
+            { text: '300', isCorrect: true },
+            { text: '400', isCorrect: false }
+        ]
+    },
+    {
+        id: 'q103',
+        question: 'Muhammad bin Tughlaq\'s Last Campaign?',
+        options: [
+            { text: 'Khorasan', isCorrect: false },
+            { text: 'Bengal', isCorrect: true },
+            { text: 'Karachil', isCorrect: false },
+            { text: 'Tibet', isCorrect: false }
+        ]
+    },
+    {
+        id: 'q104',
+        question: 'Firoz Tughlaq\'s Department for Welfare?',
+        options: [
+            { text: 'Diwan-i-Khairat', isCorrect: true },
+            { text: 'Amir-i-Kohi', isCorrect: false },
+            { text: 'Diwan-i-Bandgan', isCorrect: false },
+            { text: 'Diwan-i-Adalat', isCorrect: false }
+        ]
+    },
+    {
+        id: 'q105',
+        question: 'Timur\'s Invasion Impact?',
+        options: [
+            { text: 'Strengthened dynasty', isCorrect: false },
+            { text: 'Decline of dynasty', isCorrect: true },
+            { text: 'Expansion of empire', isCorrect: false },
+            { text: 'Cultural integration', isCorrect: false }
+        ]
+    },
+    {
+        id: 'q106',
+        question: 'Firoz Tughlaq\'s Department for Slaves?',
+        options: [
+            { text: 'Diwan-i-Khairat', isCorrect: false },
+            { text: 'Amir-i-Kohi', isCorrect: false },
+            { text: 'Diwan-i-Bandgan', isCorrect: true },
+            { text: 'Lok Nirmaan Vibhag', isCorrect: false }
+        ]
+    },
+    {
+        id: 'q107',
+        question: 'Nasiruddin Mahmud\'s Reign Duration?',
+        options: [
+            { text: '1320-1325 AD', isCorrect: false },
+            { text: '1325-1351 AD', isCorrect: false },
+            { text: '1351-1388 AD', isCorrect: false },
+            { text: '1398-1414 AD', isCorrect: true }
+        ]
+    },
+    {
+        id: 'q108',
+        question: 'Firoz Tughlaq\'s Department Purpose?',
+        options: [
+            { text: 'Trade regulation', isCorrect: false },
+            { text: 'Military management', isCorrect: false },
+            { text: 'Social welfare', isCorrect: true },
+            { text: 'Agricultural oversight', isCorrect: false }
+        ]
+    },
+    {
+        id: 'q109',
+        question: 'Firoz Tughlaq\'s Department for Slaves?',
+        options: [
+            { text: 'Diwan-i-Khairat', isCorrect: false },
+            { text: 'Amir-i-Kohi', isCorrect: false },
+            { text: 'Diwan-i-Bandgan', isCorrect: true },
+            { text: 'Lok Nirmaan Vibhag', isCorrect: false }
+        ]
+    },
+    {
+        id: 'q110',
+        question: 'Firoz Tughlaq\'s Currency Type?',
+        options: [
+            { text: 'Gold coins', isCorrect: false },
+            { text: 'Silver coins', isCorrect: false },
+            { text: 'Bronze coins', isCorrect: false },
+            { text: 'Mixed-metal coins', isCorrect: true }
+        ]
+    },
+    {
+        id: 'q111',
+        question: 'Founder of Tughlaq Dynasty?',
+        options: [
+            { text: 'Muhammad bin Tughlaq', isCorrect: false },
+            { text: 'Firoz Tughlaq', isCorrect: false },
+            { text: 'Ghiyasuddin Tughlaq', isCorrect: true },
+            { text: 'Nasiruddin Mahmud Tughlaq', isCorrect: false }
+        ]
+    },
+    {
+        id: 'q112',
+        question: 'Tughlaq Dynasty Duration?',
+        options: [
+            { text: '1200-1300 AD', isCorrect: false },
+            { text: '1320-1414 AD', isCorrect: true },
+            { text: '1350-1450 AD', isCorrect: false },
+            { text: '1400-1500 AD', isCorrect: false }
+        ]
+    },
+    {
+        id: 'q113',
+        question: 'Nickname of Muhammad bin Tughlaq?',
+        options: [
+            { text: 'Ghazi Malik', isCorrect: false },
+            { text: 'Mad King', isCorrect: true },
+            { text: 'Just Ruler', isCorrect: false },
+            { text: 'Wise Sultan', isCorrect: false }
+        ]
+    },
+    {
+        id: 'q114',
+        question: 'City Established by Ghiyasuddin?',
+        options: [
+            { text: 'Fatehabad', isCorrect: false },
+            { text: 'Tughlaqabad', isCorrect: true },
+            { text: 'Jaunpur', isCorrect: false },
+            { text: 'Devagiri', isCorrect: false }
+        ]
+    },
+    {
+        id: 'q115',
+        question: 'Chhappankot Fort Style?',
+        options: [
+            { text: 'Gothic', isCorrect: false },
+            { text: 'Roman', isCorrect: true },
+            { text: 'Mughal', isCorrect: false },
+            { text: 'Persian', isCorrect: false }
+        ]
+    },
+    {
+        id: 'q116',
+        question: 'Last Ruler of Dynasty?',
+        options: [
+            { text: 'Ghiyasuddin', isCorrect: false },
+            { text: 'Muhammad bin Tughlaq', isCorrect: false },
+            { text: 'Firoz Tughlaq', isCorrect: false },
+            { text: 'Nasiruddin Mahmud Tughlaq', isCorrect: true }
+        ]
+    },
+    {
+        id: 'q117',
+        question: 'Capital Shifted to?',
+        options: [
+            { text: 'Delhi', isCorrect: false },
+            { text: 'Tughlaqabad', isCorrect: false },
+            { text: 'Devagiri', isCorrect: true },
+            { text: 'Fatehabad', isCorrect: false }
+        ]
+    },
+    {
+        id: 'q118',
+        question: 'Department for Agriculture?',
+        options: [
+            { text: 'Diwan-i-Khairat', isCorrect: false },
+            { text: 'Amir-i-Kohi', isCorrect: true },
+            { text: 'Diwan-i-Bandgan', isCorrect: false },
+            { text: 'Diwan-i-Adalat', isCorrect: false }
+        ]
+    },
+    {
+        id: 'q119',
+        question: 'Fort Built by Firoz?',
+        options: [
+            { text: 'Red Fort', isCorrect: false },
+            { text: 'Tughlaqabad Fort', isCorrect: false },
+            { text: 'Firozshah Kotla', isCorrect: true },
+            { text: 'Qutub Minar', isCorrect: false }
+        ]
+    },
+    {
+        id: 'q120',
+        question: 'Introduced Token Currency?',
+        options: [
+            { text: 'Ghiyasuddin', isCorrect: false },
+            { text: 'Muhammad bin Tughlaq', isCorrect: true },
+            { text: 'Firoz Tughlaq', isCorrect: false },
+            { text: 'Nasiruddin Mahmud Tughlaq', isCorrect: false }
+        ]
+    }
+];
+
+
+
+        // Function to shuffle an array using Fisher-Yates algorithm
+        function shuffleArray(array) {
+            for (let i = array.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [array[i], array[j]] = [array[j], array[i]];
+            }
+            return array;
+        }
+
+        // Function to render the questions dynamically
+        function renderQuestions() {
+            const quizForm = document.getElementById('quizForm');
+            const questionsArray = getQuestions(); // Retrieve the questions array
+            if (!questionsArray || !Array.isArray(questionsArray) || questionsArray.length < 25) {
+                quizForm.innerHTML = '<p>Insufficient questions available. Please ensure there are at least 25 questions in the questions array.</p>';
+                return;
+            }
+
+            // Randomly select 25 questions from the available questions
+            const selectedQuestions = getRandomQuestions(questionsArray, 25);
+
+            // Assign shuffledQuestions to the global variable
+            shuffledQuestions = shuffleArray([...selectedQuestions]); // Create a copy and shuffle
+
+            shuffledQuestions.forEach((q, index) => {
+                const questionDiv = document.createElement('div');
+                questionDiv.classList.add('question');
+                questionDiv.id = `question-${index + 1}`; // Assign unique ID
+
+                // Question text
+                const questionText = document.createElement('p');
+                questionText.textContent = `${index + 1}. ${q.question}`;
+                questionDiv.appendChild(questionText);
+
+                // Options
+                const optionsDiv = document.createElement('div');
+                optionsDiv.classList.add('options');
+
+                // Shuffle options and assign back to q.options
+                q.options = shuffleArray([...q.options]);
+                const shuffledOptions = q.options;
+
+                // Assign labels A, B, C, D dynamically
+                const labels = ['A', 'B', 'C', 'D'];
+
+                shuffledOptions.forEach((option, optIndex) => {
+                    const optionId = `${q.id}_option${optIndex + 1}`; // Unique ID for each option
+
+                    const radioInput = document.createElement('input');
+                    radioInput.type = 'radio';
+                    radioInput.id = optionId;
+                    radioInput.name = q.id;
+                    radioInput.value = labels[optIndex]; // Assign label as value
+
+                    const label = document.createElement('label');
+                    label.htmlFor = optionId;
+                    label.textContent = `${labels[optIndex]}) ${option.text}`;
+
+                    optionsDiv.appendChild(radioInput);
+                    optionsDiv.appendChild(label);
+
+                    // Add Attempted Class when an option is selected
+                    radioInput.addEventListener('change', function() {
+                        const questionMapLink = document.querySelector(`.question-map .question-link[href="#question-${index + 1}"]`);
+                        if (questionMapLink && !questionMapLink.classList.contains('correct') && !questionMapLink.classList.contains('incorrect')) {
+                            questionMapLink.classList.add('attempted');
+                        }
+                    });
+                });
+
+                questionDiv.appendChild(optionsDiv);
+
+                // Add Feedback Div Below Options
+                const feedbackDiv = document.createElement('div');
+                feedbackDiv.classList.add('feedback');
+                feedbackDiv.id = `feedback-${index + 1}`; // Unique ID for each feedback div
+                questionDiv.appendChild(feedbackDiv);
+
+                quizForm.appendChild(questionDiv);
+            });
+
+            generateQuestionMap(shuffledQuestions.length);
+        }
+
+        // Function to retrieve the questions array
+        function getQuestions() {
+            // Replace this with your actual questions array
+            return questions; // Assuming 'questions' is defined globally
+        }
+
+        // Function to randomly select n questions from the questions array
+        function getRandomQuestions(questionsArray, n) {
+            const shuffled = shuffleArray([...questionsArray]);
+            return shuffled.slice(0, n);
+        }
+
+        // Function to generate the Question Map links
+        function generateQuestionMap(totalQuestions) {
+            const questionLinksDiv = document.getElementById('questionLinks');
+            questionLinksDiv.innerHTML = ''; // Clear any existing links
+
+            for (let i = 1; i <= totalQuestions; i++) {
+                const link = document.createElement('a');
+                link.href = `#question-${i}`;
+                link.classList.add('question-link');
+                link.textContent = `Q${i}`;
+
+                questionLinksDiv.appendChild(link);
+            }
+        }
+
+        // Timer Functionality
+        function startTimer(duration, display) {
+            let timer = duration, minutes, seconds;
+            const countdown = setInterval(function () {
+                minutes = parseInt(timer / 60, 10);
+                seconds = parseInt(timer % 60, 10);
+
+                minutes = minutes < 10 ? "0" + minutes : minutes;
+                seconds = seconds < 10 ? "0" + seconds : seconds;
+
+                display.textContent = minutes + ":" + seconds;
+
+                // Add alert class when time is less than 1 minute
+                if (timer <= 60 && timer > 0) { // 60 seconds = 1 minute
+                    display.classList.add('alert');
+                }
+
+                if (--timer < 0) {
+                    clearInterval(countdown);
+                    autoSubmit();
+                }
+            }, 1000);
+        }
+
+        // Function to automatically submit the quiz when time is up
+        function autoSubmit() {
+            alert("Time's up! The quiz will now be submitted.");
+            checkAnswers();
+        }
+
+        // Initialize the quiz on page load
+        window.onload = function () {
+            renderQuestions(); // Render questions on page load
+            const tenMinutes = 60 * 10, // 10 minutes in seconds
+                  display = document.getElementById('timer');
+            startTimer(tenMinutes, display);
+        };
+
+        // Function to check answers and display the result
+        function checkAnswers() {
+            let score = 0;
+            let totalQuestions = shuffledQuestions.length; // Total number of questions
+
+            shuffledQuestions.forEach((q, index) => { // Iterate over each question
+                const selectedOption = document.querySelector(`input[name="${q.id}"]:checked`);
+                const feedbackDiv = document.getElementById(`feedback-${index + 1}`);
+                
+                if (selectedOption) {
+                    // Get the selected label (A, B, C, D)
+                    const selectedLabel = selectedOption.value;
+                    // Map label to option index
+                    const labelIndex = ['A', 'B', 'C', 'D'].indexOf(selectedLabel);
+                    if (labelIndex !== -1 && q.options[labelIndex].isCorrect) {
+                        score += 1; // Add 1 mark for correct answer
+
+                        // Mark the question link as correct in the Question Map
+                        const questionMapLink = document.querySelector(`.question-map .question-link[href="#question-${index + 1}"]`);
+                        if (questionMapLink) {
+                            questionMapLink.classList.add('correct');
+                            questionMapLink.classList.remove('incorrect', 'attempted');
+                        }
+
+                        // Update Feedback Below the Question
+                        if (feedbackDiv) {
+                            feedbackDiv.textContent = 'Right';
+                            feedbackDiv.classList.add('right');
+                            feedbackDiv.classList.remove('wrong', 'not-attempted');
+                        }
+                    } else {
+                        score -= 0.5; // Deduct 0.5 marks for incorrect answer
+
+                        // Mark the question link as incorrect in the Question Map
+                        const questionMapLink = document.querySelector(`.question-map .question-link[href="#question-${index + 1}"]`);
+                        if (questionMapLink) {
+                            questionMapLink.classList.add('incorrect');
+                            questionMapLink.classList.remove('correct', 'attempted');
+                        }
+
+                        // Update Feedback Below the Question
+                        if (feedbackDiv) {
+                            feedbackDiv.textContent = 'Wrong';
+                            feedbackDiv.classList.add('wrong');
+                            feedbackDiv.classList.remove('right', 'not-attempted');
+                        }
+                    }
+                } else {
+                    // If the question was not answered, mark as not attempted
+                    const questionMapLink = document.querySelector(`.question-map .question-link[href="#question-${index + 1}"]`);
+                    if (questionMapLink) {
+                        // Remove both classes if the question was not answered
+                        questionMapLink.classList.remove('correct', 'incorrect', 'attempted');
+                    }
+
+                    // Update Feedback Below the Question
+                    if (feedbackDiv) {
+                        feedbackDiv.textContent = 'Not Attempted';
+                        feedbackDiv.classList.add('not-attempted');
+                        feedbackDiv.classList.remove('right', 'wrong');
+                    }
+                }
+            });
+
+            // Round the score to one decimal place
+            score = Math.round(score * 10) / 10;
+
+            // Update the result in the Question Map Sidebar
+            const resultDiv = document.getElementById('result');
+            resultDiv.textContent = `You scored ${score} out of ${totalQuestions}`;
+
+            // Update the result below the questions list
+            const resultDivBelow = document.getElementById('resultBelow');
+            resultDivBelow.textContent = `You scored ${score} out of ${totalQuestions}`;
+
+            // Disable all inputs to prevent changes after submission
+            const inputs = document.querySelectorAll('input[type="radio"]');
+            inputs.forEach(input => {
+                input.disabled = true;
+            });
+
+            // Disable the submit buttons to prevent multiple submissions
+            const submitButton = document.getElementById('submitBtn');
+            submitButton.disabled = true;
+
+            const submitButtonBelow = document.getElementById('submitBtnBelow');
+            if (submitButtonBelow) {
+                submitButtonBelow.disabled = true;
+            }
+        }
+
+        // Toggle Question Map on small screens
+        const toggleBtn = document.getElementById('toggleQuestionMap');
+        const questionMap = document.getElementById('questionMap');
+
+        toggleBtn.addEventListener('click', () => {
+            questionMap.classList.toggle('active');
+        });
+    </script>
+</body>
+</html>
